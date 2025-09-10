@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+bool _sortByRating = false;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -41,16 +43,16 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Confirmar eliminación"),
+          title: const Text("Confirmar eliminación",),
           content: Text(
             "¿Está seguro de eliminar a los siguientes jugadores?\n\n$seleccionadosNombres",
-          ),
+           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // cancelar
               },
-              child: const Text("Cancelar"),
+              child: const Text("Cancelar", ),
             ),
             TextButton(
               onPressed: () async {
@@ -70,7 +72,7 @@ class _HomePageState extends State<HomePage> {
                 await _saveJugadores();
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text("Eliminar"),
+              child: const Text("Eliminar", ),
             ),
           ],
         );
@@ -133,131 +135,174 @@ class _HomePageState extends State<HomePage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text('Agregar Jugador'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      decoration: const InputDecoration(labelText: 'Nombre'),
-                      onChanged: (value) => nombre = value.trim(),
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: genero,
-                      decoration: const InputDecoration(labelText: 'Género'),
-                      items: const [
-                        DropdownMenuItem(value: 'Hombre', child: Text('Hombre ♂')),
-                        DropdownMenuItem(value: 'Mujer', child: Text('Mujer ♀')),
-                      ],
-                      onChanged: (value) {
-                        setStateDialog(() {
-                          genero = value!;
-                        });
-                      },
-                    ),
-                    TextField(
-                      decoration: const InputDecoration(labelText: 'Edad'),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        edad = int.tryParse(value) ?? 0;
-                      },
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: rol,
-                      decoration: const InputDecoration(labelText: 'Rol'),
-                      items: const [
-                        DropdownMenuItem(value: 'Atacante', child: Text('Atacante')),
-                        DropdownMenuItem(value: 'Defensor', child: Text('Defensor')),
-                      ],
-                      onChanged: (value) {
-                        setStateDialog(() {
-                          rol = value!;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (index) {
-                        return IconButton(
-                          icon: Icon(
-                            index < calificacion ? Icons.star : Icons.star_border,
-                            color: Colors.amber,
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                // Calculamos el ancho disponible del dialog
+                double ancho = constraints.maxWidth;
+                // Tomamos como referencia 410 (como hicimos antes)
+                double factor = ancho / 410;
+
+                // Tamaños calculados
+                double iconSize = 40 * factor; // icono persona
+                double starSize = 28 * factor; // iconos estrellas
+                double textFontSize = 16 * factor; // textos normales
+                double labelFontSize = 14 * factor; // label de input
+
+                return AlertDialog(
+                  title: Text(
+                    'Agregar Jugador',
+                    style: TextStyle(fontSize: textFontSize + 2, fontWeight: FontWeight.bold),
+                  ),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Nombre',
+                            labelStyle: TextStyle(fontSize: labelFontSize),
                           ),
-                          onPressed: () {
+                          style: TextStyle(fontSize: textFontSize),
+                          onChanged: (value) => nombre = value.trim(),
+                        ),
+                        DropdownButtonFormField<String>(
+                          value: genero,
+                          decoration: InputDecoration(
+                            labelText: 'Género',
+                            labelStyle: TextStyle(fontSize: labelFontSize),
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: 'Hombre', child: Text('Hombre ♂')),
+                            DropdownMenuItem(value: 'Mujer', child: Text('Mujer ♀')),
+                          ],
+                          style: TextStyle(fontSize: textFontSize),
+                          onChanged: (value) {
                             setStateDialog(() {
-                              calificacion = index + 1;
+                              genero = value!;
                             });
                           },
-                        );
-                      }),
+                        ),
+                        TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Edad',
+                            labelStyle: TextStyle(fontSize: labelFontSize),
+                          ),
+                          keyboardType: TextInputType.number,
+                          style: TextStyle(fontSize: textFontSize),
+                          onChanged: (value) {
+                            edad = int.tryParse(value) ?? 0;
+                          },
+                        ),
+                        DropdownButtonFormField<String>(
+                          value: rol,
+                          decoration: InputDecoration(
+                            labelText: 'Rol',
+                            labelStyle: TextStyle(fontSize: labelFontSize),
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: 'Atacante', child: Text('Atacante')),
+                            DropdownMenuItem(value: 'Defensor', child: Text('Defensor')),
+                          ],
+                          style: TextStyle(fontSize: textFontSize),
+                          onChanged: (value) {
+                            setStateDialog(() {
+                              rol = value!;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(5, (index) {
+                            return IconButton(
+                              icon: Icon(
+                                index < calificacion ? Icons.star : Icons.star_border,
+                                color: Colors.amber,
+                                size: starSize,
+                              ),
+                              onPressed: () {
+                                setStateDialog(() {
+                                  calificacion = index + 1;
+                                });
+                              },
+                            );
+                          }),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      child: Text('Cancelar', style: TextStyle(fontSize: textFontSize)),
+                      onPressed: () => Navigator.pop(context, null),
+                    ),
+                    ElevatedButton(
+                      child: Text('Guardar', style: TextStyle(fontSize: textFontSize)),
+                      onPressed: () {
+                        if (nombre.isNotEmpty && edad > 0) {
+                          final jugador = {
+                            'nombre': nombre,
+                            'genero': genero,
+                            'edad': edad,
+                            'rol': rol,
+                            'calificacion': calificacion,
+                          };
+                          Navigator.pop(context, jugador);
+                        }
+                      },
                     ),
                   ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                ElevatedButton(
-                  child: const Text('Guardar'),
-                  onPressed: () async {
-                    if (nombre.isNotEmpty && edad > 0) {
-                      // Verificar si ya existe un jugador con ese nombre
-                      bool existe = jugadores.any(
-                            (jugador) =>
-                        (jugador['nombre'] as String).toLowerCase() ==
-                            nombre.toLowerCase(),
-                      );
-
-                      if (existe) {
-                        // Mostrar alerta de duplicado
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Atención'),
-                              content: const Text('¡Ya existe un jugador con ese nombre!'),
-                              actions: [
-                                TextButton(
-                                  child: const Text('Aceptar'),
-                                  onPressed: () => Navigator.pop(context),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                        return; // No seguir guardando
-                      }
-
-                      // Si no existe, se agrega normalmente
-                      setState(() {
-                        jugadores.add({
-                          'nombre': nombre,
-                          'genero': genero,
-                          'edad': edad,
-                          'rol': rol,
-                          'calificacion': calificacion,
-                        });
-                      });
-
-                      await _saveJugadores(); // <-- guardar al agregar
-
-                      if (context.mounted) Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
+                );
+              },
             );
           },
         );
       },
-    );
+    ).then((nuevoJugador) {
+      if (nuevoJugador != null) {
+        bool existe = jugadores.any((j) =>
+        (j['nombre'] as String).toLowerCase() ==
+            (nuevoJugador['nombre'] as String).toLowerCase());
+
+        if (existe) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  double ancho = constraints.maxWidth;
+                  double factor = ancho / 410;
+                  double textFontSize = 16 * factor;
+
+                  return AlertDialog(
+                    title: Text('Atención', style: TextStyle(fontSize: textFontSize + 2)),
+                    content: Text('¡Ya existe un jugador con ese nombre!',
+                        style: TextStyle(fontSize: textFontSize)),
+                    actions: [
+                      TextButton(
+                        child: Text('Aceptar', style: TextStyle(fontSize: textFontSize)),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          );
+        } else {
+          setState(() {
+            jugadores.add(nuevoJugador);
+            jugadores.sort((a, b) =>
+                (a['nombre'] as String)
+                    .toLowerCase()
+                    .compareTo((b['nombre'] as String).toLowerCase()));
+          });
+          _saveJugadores();
+        }
+      }
+    });
   }
 
-// Función para agregar un jugador a la partida comenzada
   void agregarJugadorDialog() {
     final Set<int> seleccionadosDialog = {};
 
@@ -273,9 +318,9 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Generar un set de claves únicas de jugadores en juego (sin edad)
-    Set<String> clavesJugadoresEnJuego = jugadoresEnJuego.map((j) =>
-    "${j['nombre']}_${j['rol']}_${j['genero']}"
-    ).toSet();
+    Set<String> clavesJugadoresEnJuego = jugadoresEnJuego
+        .map((j) => "${j['nombre']}_${j['rol']}_${j['genero']}")
+        .toSet();
 
     // Filtrar jugadores que no están en juego (comparando por clave)
     List<Map<String, dynamic>> disponibles = jugadores.where((j) {
@@ -295,92 +340,113 @@ class _HomePageState extends State<HomePage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text('Agregar jugadores a equipos'),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: disponibles.length,
-                  itemBuilder: (context, index) {
-                    final jugador = disponibles[index];
-                    return ListTile(
-                      onTap: () {
-                        setStateDialog(() {
-                          if (seleccionadosDialog.contains(index)) {
-                            seleccionadosDialog.remove(index);
-                          } else {
-                            seleccionadosDialog.add(index);
-                          }
-                        });
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                double ancho = constraints.maxWidth;
+                double factor = ancho / 410;
+
+                double textFontSize = 16 * factor;
+                double labelFontSize = 14 * factor;
+                double starSize = 20 * factor;
+                double spacing = 6 * factor;
+
+                return AlertDialog(
+                  title: Text(
+                    'Agregar jugadores a equipos',
+                    style: TextStyle(fontSize: textFontSize + 2, fontWeight: FontWeight.bold),
+                  ),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: disponibles.length,
+                      itemBuilder: (context, index) {
+                        final jugador = disponibles[index];
+                        return ListTile(
+                          onTap: () {
+                            setStateDialog(() {
+                              if (seleccionadosDialog.contains(index)) {
+                                seleccionadosDialog.remove(index);
+                              } else {
+                                seleccionadosDialog.add(index);
+                              }
+                            });
+                          },
+                          leading: Checkbox(
+                            value: seleccionadosDialog.contains(index),
+                            onChanged: (value) {
+                              setStateDialog(() {
+                                if (value == true) {
+                                  seleccionadosDialog.add(index);
+                                } else {
+                                  seleccionadosDialog.remove(index);
+                                }
+                              });
+                            },
+                          ),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                jugador['nombre'],
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: textFontSize,
+                                ),
+                              ),
+                              Text(
+                                '${jugador['edad']} años',
+                                style: TextStyle(fontSize: textFontSize),
+                              ),
+                            ],
+                          ),
+                          subtitle: Row(
+                            children: [
+                              Row(
+                                children: List.generate(5, (starIndex) {
+                                  return Icon(
+                                    starIndex < (jugador['calificacion'] ?? 0)
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: Colors.amber,
+                                    size: starSize,
+                                  );
+                                }),
+                              ),
+                              SizedBox(width: spacing),
+                              Text(
+                                '(${jugador['rol']})',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                  fontSize: textFontSize,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       },
-                      leading: Checkbox(
-                        value: seleccionadosDialog.contains(index),
-                        onChanged: (value) {
-                          setStateDialog(() {
-                            if (value == true) {
-                              seleccionadosDialog.add(index);
-                            } else {
-                              seleccionadosDialog.remove(index);
-                            }
-                          });
-                        },
-                      ),
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            jugador['nombre'],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text('${jugador['edad']} años'),
-                        ],
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Row(
-                            children: List.generate(5, (starIndex) {
-                              return Icon(
-                                starIndex < (jugador['calificacion'] ?? 0)
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                color: Colors.amber,
-                                size: 20,
-                              );
-                            }),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '(${jugador['rol']})',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final List<Map<String, dynamic>> jugadoresSeleccionados =
-                    seleccionadosDialog.map((i) => disponibles[i]).toList();
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text('Cancelar', style: TextStyle(fontSize: textFontSize)),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final List<Map<String, dynamic>> jugadoresSeleccionados =
+                        seleccionadosDialog.map((i) => disponibles[i]).toList();
 
-                    await asignarSuplentes(jugadoresSeleccionados); // Esperar a que termine
+                        await asignarSuplentes(jugadoresSeleccionados); // Esperar a que termine
 
-                    Navigator.pop(context); // Cerrar después de todo
-                  },
-                  child: const Text('Confirmar'),
-                ),
-              ],
+                        Navigator.pop(context); // Cerrar después de todo
+                      },
+                      child: Text('Confirmar', style: TextStyle(fontSize: textFontSize)),
+                    ),
+                  ],
+                );
+              },
             );
           },
         );
@@ -389,28 +455,47 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> asignarSuplentes(List<Map<String, dynamic>> jugadoresSeleccionados) async {
-    int totalSuplentesActuales = equiposVisuales.fold(0, (sum, eq) => sum + (eq['suplentes'] as List).length);
+    int totalSuplentesActuales =
+    equiposVisuales.fold(0, (sum, eq) => sum + (eq['suplentes'] as List).length);
     int totalSuplentesFinal = totalSuplentesActuales + jugadoresSeleccionados.length;
 
     if (totalSuplentesFinal >= 6) {
       bool? deseaResortear = await showDialog<bool>(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: const Text('Reorganizar equipos'),
-            content: const Text(
-                'Al agregar estos jugadores habrá 6 o más suplentes en total.\n'
-                    '¿Quieres resortear los equipos creando un equipo extra?'),
-            actions: [
-              TextButton(
-                child: const Text('No'),
-                onPressed: () => Navigator.pop(context, false),
-              ),
-              ElevatedButton(
-                child: const Text('Sí, resortear'),
-                onPressed: () => Navigator.pop(context, true),
-              ),
-            ],
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              double ancho = constraints.maxWidth;
+              double factor = ancho / 410;
+
+              double titleFont = 18 * factor;
+              double contentFont = 16 * factor;
+              double buttonFont = 16 * factor;
+              double spacing = 8 * factor;
+
+              return AlertDialog(
+                title: Text(
+                  'Reorganizar equipos',
+                  style: TextStyle(fontSize: titleFont, fontWeight: FontWeight.bold),
+                ),
+                content: Text(
+                  'Al agregar estos jugadores habrá 6 o más suplentes en total.\n'
+                      '¿Quieres resortear los equipos creando un equipo extra?',
+                  style: TextStyle(fontSize: contentFont),
+                ),
+                actions: [
+                  TextButton(
+                    child: Text('No', style: TextStyle(fontSize: buttonFont)),
+                    onPressed: () => Navigator.pop(context, false),
+                  ),
+                  ElevatedButton(
+                    child: Text('Sí, resortear', style: TextStyle(fontSize: buttonFont)),
+                    onPressed: () => Navigator.pop(context, true),
+                  ),
+                ],
+                actionsPadding: EdgeInsets.symmetric(horizontal: spacing, vertical: spacing / 2),
+              );
+            },
           );
         },
       );
@@ -423,9 +508,9 @@ class _HomePageState extends State<HomePage> {
 
         return;
       }
-
     }
 
+    // Resto de la función mantiene la lógica original
     for (var suplente in jugadoresSeleccionados) {
       equiposVisuales.sort((a, b) => (a['puntaje'] as int).compareTo(b['puntaje'] as int));
       var equipoMenor = equiposVisuales.first;
@@ -442,7 +527,9 @@ class _HomePageState extends State<HomePage> {
       int diff = (equiposVisuales.last['puntaje'] - equiposVisuales.first['puntaje']).abs();
       if (diff <= 1) {
         String rolSuplente = suplente['rol'];
-        int minRol = equiposVisuales.map((e) => conteoRoles(e)[rolSuplente] ?? 0).reduce((a, b) => a < b ? a : b);
+        int minRol = equiposVisuales
+            .map((e) => conteoRoles(e)[rolSuplente] ?? 0)
+            .reduce((a, b) => a < b ? a : b);
         for (var eq in equiposVisuales) {
           if ((conteoRoles(eq)[rolSuplente] ?? 0) == minRol) {
             equipoMenor = eq;
@@ -460,8 +547,10 @@ class _HomePageState extends State<HomePage> {
         var equipoMasBajo = equiposVisuales.firstWhere((e) => e != equipoMenor);
 
         if ((puntajeSimulado - (equipoMasBajo['puntaje'] as int)) >= 2) {
-          List<Map<String, dynamic>> posiblesSwap = List<Map<String, dynamic>>.from(equipoMenor['suplentes']);
-          posiblesSwap.sort((a, b) => (a['calificacion'] as int).compareTo(b['calificacion'] as int));
+          List<Map<String, dynamic>> posiblesSwap =
+          List<Map<String, dynamic>>.from(equipoMenor['suplentes']);
+          posiblesSwap.sort(
+                  (a, b) => (a['calificacion'] as int).compareTo(b['calificacion'] as int));
 
           for (var swapJugador in posiblesSwap) {
             if ((swapJugador['calificacion'] as int) < (suplente['calificacion'] as int)) {
@@ -482,7 +571,8 @@ class _HomePageState extends State<HomePage> {
       } while (hizoSwap);
 
       (equipoMenor['suplentes'] as List).add(suplente);
-      equipoMenor['puntaje'] = _sumarCalificaciones([...equipoMenor['jugadores'], ...equipoMenor['suplentes']]);
+      equipoMenor['puntaje'] =
+          _sumarCalificaciones([...equipoMenor['jugadores'], ...equipoMenor['suplentes']]);
     }
 
     setState(() {});
@@ -506,222 +596,308 @@ class _HomePageState extends State<HomePage> {
   PreferredSizeWidget _buildAppBarJugadores() {
     return PreferredSize(
       preferredSize: const Size.fromHeight(kToolbarHeight),
-      child: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color.fromARGB(180, 173, 216, 230),
-                Colors.white,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: SafeArea(
-            child: ListTile(
-              leading: IconButton(
-                tooltip: 'Acerca del proyecto',
-                icon: const Icon(Icons.help_outline, color: Colors.black87),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Center(child: Text('Instituto Superior Goya')),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(height: 10),
-                          Image.network(
-                            'https://isgoya-crr.infd.edu.ar/sitio/wp-content/uploads/2018/08/isglogo.jpg',
-                            height: 200,
-                            loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.error);
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          const Text(
-                            'Proyecto de Prácticas Profesionalizantes\n'
-                                'Tecnicatura Superior en Desarrollo de Software - 2do Año\n\n'
-                                'Participantes:\n'
-                                '• Daniel Balcedo\n'
-                                '• Facundo Moreira\n'
-                                '• Leo Meza\n'
-                                '• Enzo Mondaque\n\n'
-                                '🚫 Prohibida su distribución',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
-                      actions: [
-                        Center(
-                          child: TextButton(
-                            child: const Text('Aceptar'),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                },
-              ),
-              title: const Text(
-                'Newcom - Lista de Jugadores',
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final anchoDisponible = constraints.maxWidth;
+          double fs(double porcentaje) => anchoDisponible * porcentaje;
+
+          return AppBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color.fromARGB(180, 173, 216, 230),
+                    Colors.white,
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
-                textAlign: TextAlign.center,
               ),
-              trailing: Wrap(
-                spacing: 4,
-                children: [
-                  if (_deleteMode)
-                    IconButton(
-                      tooltip: 'Confirmar',
-                      icon: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
+              child: SafeArea(
+                child: ListTile(
+                  leading: IconButton(
+                    tooltip: 'Acerca del proyecto',
+                    icon: Icon(Icons.help_outline,
+                        color: Colors.black87, size: fs(24 / 410)), // ← proporcional
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Center(
+                            child: Text(
+                              'Instituto Superior Goya',
+                              style: TextStyle(fontSize: fs(20 / 410)),
+                            ),
+                          ),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(height: fs(10 / 410)),
+                              Image.network(
+                                'https://isgoya-crr.infd.edu.ar/sitio/wp-content/uploads/2018/08/isglogo.jpg',
+                                height: fs(200 / 410),
+                                loadingBuilder: (BuildContext context, Widget child,
+                                    ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                          : null,
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(Icons.error, size: fs(24 / 410));
+                                },
+                              ),
+                              SizedBox(height: fs(20 / 410)),
+                              const Text(
+                                'Proyecto de Prácticas Profesionalizantes\n'
+                                    'Tecnicatura Superior en Desarrollo de Software - 2do Año\n\n'
+                                    'Participantes:\n'
+                                    '• Daniel Balcedo\n'
+                                    '• Facundo Moreira\n'
+                                    '• Leo Meza\n'
+                                    '• Enzo Mondaque\n\n'
+                                    '🚫 Prohibida su distribución',
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            Center(
+                              child: TextButton(
+                                child: const Text('Aceptar'),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            )
+                          ],
                         ),
-                        child: const Icon(Icons.check, color: Colors.black87),
-                      ),
-                      onPressed: _eliminarSeleccionados,
-                    ),
-                  IconButton(
-                    tooltip: _deleteMode ? 'Cancelar selección' : 'Eliminar',
-                    icon: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        _deleteMode ? Icons.close : Icons.delete,
-                        color: Colors.red,
-                      ),
-                    ),
-                    onPressed: _toggleDeleteMode,
+                      );
+                    },
                   ),
-                ],
+                  title: const AutoSizeText(
+                    'Newcom - Lista de Jugadores',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18, // esto queda como está
+                    ),
+                    textAlign: TextAlign.center,
+                    minFontSize: 12,
+                    maxLines: 1,
+                  ),
+                  trailing: Wrap(
+                    spacing: 4,
+                    children: [
+                      IconButton(
+                        tooltip: _sortByRating
+                            ? 'Ordenar alfabéticamente'
+                            : 'Ordenar por calificación',
+                        icon: Container(
+                          padding: EdgeInsets.all(fs(6 / 410)),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: _sortByRating
+                              ? AutoSizeText(
+                            'AZ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                              fontSize: fs(18 / 410),
+                            ),
+                            minFontSize: 12,
+                            maxLines: 1,
+                          )
+                              : Icon(Icons.star,
+                              color: Colors.amber, size: fs(24 / 410)),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _sortByRating = !_sortByRating;
+                          });
+                        },
+                      ),
+                      if (_deleteMode)
+                        IconButton(
+                          tooltip: 'Confirmar',
+                          icon: Container(
+                            padding: EdgeInsets.all(fs(6 / 410)),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.check,
+                                color: Colors.black87, size: fs(24 / 410)),
+                          ),
+                          onPressed: _eliminarSeleccionados,
+                        ),
+                      IconButton(
+                        tooltip: _deleteMode ? 'Cancelar selección' : 'Eliminar',
+                        icon: Container(
+                          padding: EdgeInsets.all(fs(6 / 410)),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _deleteMode ? Icons.close : Icons.delete,
+                            color: Colors.red,
+                            size: fs(24 / 410),
+                          ),
+                        ),
+                        onPressed: _toggleDeleteMode,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildJugadoresPage() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final anchoDisponible = constraints.maxWidth;
 
-    return Scaffold(
-      appBar: _buildAppBarJugadores(),
-      body: jugadores.isEmpty
-          ? const Center(child: Text('No hay jugadores registrados'))
-          : ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: jugadores.length,
-        itemBuilder: (context, index) {
-          final jugador = jugadores[index];
-          final colorFondo = jugador['genero'] == 'Hombre'
-              ? Colors.blue.withOpacity(0.6)
-              : Colors.pink.withOpacity(0.6);
-          final seleccionado = _seleccionados.contains(index);
+        // Lambda para calcular tamaño relativo al ancho
+        double fs(double porcentaje) => anchoDisponible * porcentaje;
 
-          return Card(
-            color: colorFondo,
-            shape: RoundedRectangleBorder(
-              side: seleccionado
-                  ? const BorderSide(width: 2)
-                  : BorderSide.none,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              onTap: _deleteMode
-                  ? () {
-                setState(() {
-                  if (_seleccionados.contains(index)) {
-                    _seleccionados.remove(index);
-                  } else {
-                    _seleccionados.add(index);
-                  }
-                });
-              }
-                  : null,
-              leading: _deleteMode
-                  ? Checkbox(
-                value: _seleccionados.contains(index),
-                onChanged: (value) {
-                  setState(() {
-                    if (value == true) {
-                      _seleccionados.add(index);
-                    } else {
-                      _seleccionados.remove(index);
-                    }
-                  });
-                },
-              )
-                  : const Icon(Icons.person, size: 40),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    jugador['nombre'],
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text('${jugador['edad']} años'),
-                ],
-              ),
-              subtitle: Row(
-                children: [
-                  Row(
-                    children: List.generate(5, (starIndex) {
-                      return Icon(
-                        starIndex < (jugador['calificacion'] ?? 0)
-                            ? Icons.star
-                            : Icons.star_border,
-                        color: Colors.amber,
-                        size: 20,
-                      );
-                    }),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '(${jugador['rol']})',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
+        if (_sortByRating) {
+          jugadores.sort(
+                (a, b) => (b['calificacion'] as int).compareTo(a['calificacion'] as int),
           );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        shape: const CircleBorder(),
-        onPressed: _agregarJugador,
-        child: const Icon(Icons.add, size: 28, color: Colors.white),
-      ),
+        } else {
+          jugadores.sort(
+                (a, b) => (a['nombre'] as String)
+                .toLowerCase()
+                .compareTo((b['nombre'] as String).toLowerCase()),
+          );
+        }
+
+        return Scaffold(
+          appBar: _buildAppBarJugadores(),
+          body: jugadores.isEmpty
+              ? Center(
+            child: AutoSizeText(
+              'No hay jugadores registrados',
+              style: TextStyle(fontSize: fs(16 / 410)), // ≈0.039
+              minFontSize: 8,
+              maxLines: 1,
+            ),
+          )
+              : ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: jugadores.length,
+            itemBuilder: (context, index) {
+              final jugador = jugadores[index];
+              final colorFondo = jugador['genero'] == 'Hombre'
+                  ? Colors.blue.withOpacity(0.6)
+                  : Colors.pink.withOpacity(0.6);
+              final seleccionado = _seleccionados.contains(index);
+
+              return Card(
+                color: colorFondo,
+                shape: RoundedRectangleBorder(
+                  side: seleccionado
+                      ? const BorderSide(width: 2)
+                      : BorderSide.none,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  onTap: _deleteMode
+                      ? () {
+                    setState(() {
+                      if (_seleccionados.contains(index)) {
+                        _seleccionados.remove(index);
+                      } else {
+                        _seleccionados.add(index);
+                      }
+                    });
+                  }
+                      : null,
+                  leading: _deleteMode
+                      ? Checkbox(
+                    value: _seleccionados.contains(index),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          _seleccionados.add(index);
+                        } else {
+                          _seleccionados.remove(index);
+                        }
+                      });
+                    },
+                  )
+                      : Icon(Icons.person, size: fs(40 / 410)), // ícono proporcional
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AutoSizeText(
+                        jugador['nombre'],
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: fs(16 / 410),
+                        ),
+                        minFontSize: 8,
+                        maxLines: 1,
+                      ),
+                      AutoSizeText(
+                        '${jugador['edad']} años',
+                        style: TextStyle(fontSize: fs(16 / 410)),
+                        minFontSize: 8,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                  subtitle: Row(
+                    children: [
+                      Row(
+                        children: List.generate(5, (starIndex) {
+                          return Icon(
+                            starIndex < (jugador['calificacion'] ?? 0)
+                                ? Icons.star
+                                : Icons.star_border,
+                            color: Colors.amber,
+                            size: fs(20 / 410), // estrellas proporcionales
+                          );
+                        }),
+                      ),
+                      SizedBox(width: fs(6 / 410)),
+                      AutoSizeText(
+                        '(${jugador['rol']})',
+                        style: TextStyle(
+                          fontSize: fs(16 / 410),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                        minFontSize: 8,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: Colors.blue,
+            shape: const CircleBorder(),
+            onPressed: _agregarJugador,
+            child: Icon(Icons.add, size: fs(28 / 410), color: Colors.white),
+          ),
+        );
+      },
     );
   }
 
@@ -729,6 +905,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: PageView(
         controller: _pageController,
@@ -756,465 +933,420 @@ class _HomePageState extends State<HomePage> {
   // ---------------------- Inicio ----------------------
 
   Widget _InicioPage() {
-    // Contar varones y mujeres
-    final cantidadVarones = jugadores
-        .where((j) => j['genero'] == 'Hombre')
-        .length;
-    final cantidadMujeres = jugadores
-        .where((j) => j['genero'] == 'Mujer')
-        .length;
+    final cantidadVarones = jugadores.where((j) => j['genero'] == 'Hombre').length;
+    final cantidadMujeres = jugadores.where((j) => j['genero'] == 'Mujer').length;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        child: Column(
-          children: [
-            // Parte superior: cantidad total y varones/mujeres
-            Column(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double anchoDisponible = constraints.maxWidth;
+        double porc(double porcentaje) => anchoDisponible * porcentaje;
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+            child: Column(
               children: [
-                Text(
-                  'Cantidad de jugadores: ${jugadores.length}',
-                  style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                Column(
                   children: [
-                    Text(
-                      'Varones: $cantidadVarones',
-                      style: const TextStyle(
-                          fontSize: 20,
+                    AutoSizeText(
+                      'Cantidad de jugadores: ${jugadores.length}',
+                      style: TextStyle(
+                        // fontSize: 28,
+                          fontSize: porc(0.07),
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue),
+                          color: Colors.black),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      minFontSize: 20,
                     ),
-                    Text(
-                      'Mujeres: $cantidadMujeres',
-                      style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.pink),
+                    SizedBox(height: porc(0.048)), // antes 20
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        AutoSizeText(
+                          'Varones: $cantidadVarones',
+                          style: TextStyle(
+                            // fontSize: 20,
+                              fontSize: porc(0.048),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue),
+                          maxLines: 1,
+                          minFontSize: 12,
+                        ),
+                        AutoSizeText(
+                          'Mujeres: $cantidadMujeres',
+                          style: TextStyle(
+                            // fontSize: 20,
+                              fontSize: porc(0.048),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.pink),
+                          maxLines: 1,
+                          minFontSize: 12,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+                Expanded(
+                  child: equiposVisuales.isEmpty
+                      ? Center(
+                    child: AutoSizeText(
+                      'No hay equipos generados aún',
+                      maxLines: 2,
+                      minFontSize: 14,
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  )
+                      : LayoutBuilder(
+                    builder: (_, constraints) {
+                      double cardWidth = (constraints.maxWidth - 12) / 2;
+                      cardWidth = cardWidth > 280 ? 280 : cardWidth;
 
-            //carta para los equipos
-            Expanded(
-              child: equiposVisuales.isEmpty
-                  ? Center(child: Text('No hay equipos generados aún'))
-                  : LayoutBuilder(
-                builder: (_, constraints) {
-                  // Calcular ancho de cada card para que entren al menos 2 por fila con espacio
-                  double cardWidth = (constraints.maxWidth - 12) / 2; // 12 = spacing
-                  cardWidth = cardWidth > 280 ? 280 : cardWidth;
+                      Widget buildJugadorIcono(Map<String, dynamic> jugador,
+                          {double? iconSize}) {
+                        Color colorGenero = jugador['genero'] == 'Mujer'
+                            ? Colors.pink
+                            : Colors.blue;
+                        IconData iconRol = jugador['rol'] == 'Atacante'
+                            ? Icons.sports_martial_arts
+                            : Icons.shield;
+                        int calif = jugador['calificacion'];
 
-                  return SingleChildScrollView(
-                    padding: EdgeInsets.all(6),
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: equiposVisuales.map((equipo) {
-                        List jugadores = equipo['jugadores'];
-                        List suplentes = equipo['suplentes'];
-
-                        Widget buildJugadorIcono(Map<String, dynamic> jugador, {double iconSize = 26}) {
-                          Color colorGenero = jugador['genero'] == 'Mujer' ? Colors.pink : Colors.blue;
-                          IconData iconRol = jugador['rol'] == 'Atacante' ? Icons.sports_martial_arts : Icons.shield;
-                          int calif = jugador['calificacion'];
-
-                          // Construir estrellas más pequeñas
-                          List<Widget> estrellas = List.generate(5, (i) {
-                            return Icon(
-                              i < calif ? Icons.star : Icons.star_border,
-                              size: 10, // más pequeño
-                              color: Colors.amber,
-                            );
-                          });
-
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(children: estrellas),
-                              SizedBox(height: 2),
-                              Row(
-                                children: [
-                                  Icon(Icons.person, size: iconSize, color: colorGenero),
-                                  SizedBox(width: 2),
-                                  Icon(iconRol, size: 16, color: Colors.white60),
-                                ],
-                              ),
-                              SizedBox(height: 2),
-                              SizedBox(
-                                width: iconSize * 1.5,
-                                child: Text(
-                                  jugador['nombre'],
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        List<Widget> estrellas = List.generate(5, (i) {
+                          return Icon(
+                            i < calif ? Icons.star : Icons.star_border,
+                            // size: 10,
+                            size: porc(0.024),
+                            color: Colors.amber,
                           );
-                        }
+                        });
 
-                        return Container(
-                          width: cardWidth - 10,
-                          // Fijamos altura para que todas igual, ajusta según contenido
-                          height: 420,
-                          padding: EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[700],
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 4)],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Header equipo + puntaje
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      equipo['equipo'],
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    '${equipo['puntaje']} pts',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
+                        double iconoSize = iconSize ?? porc(0.065);
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(children: estrellas),
+                            SizedBox(height: porc(0.005)), // antes 2
+                            Row(
+                              children: [
+                                Icon(Icons.person,
+                                    // size: iconSize,
+                                    size: iconoSize,
+                                    color: colorGenero),
+                                SizedBox(width: porc(0.005)), // antes 2
+                                Icon(
+                                  iconRol,
+                                  // size: 16,
+                                  size: porc(0.04),
+                                  color: Colors.white60,
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: porc(0.004)), // antes 2
+                            SizedBox(
+                              width: iconoSize * 1.5,
+                              child: AutoSizeText(
+                                jugador['nombre'],
+                                style: TextStyle(
+                                  // fontSize: 13,
+                                  fontSize: porc(0.034),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                minFontSize: 8,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      return SingleChildScrollView(
+                        padding: EdgeInsets.all(6),
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: equiposVisuales.map((equipo) {
+                            List jugadores = equipo['jugadores'];
+                            List suplentes = equipo['suplentes'];
+
+                            return Container(
+                              width: cardWidth - 10,
+                              // height: 420,
+                              height: porc(1.02),
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[700],
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.black45, blurRadius: 4)
                                 ],
                               ),
-                              SizedBox(height: 5),
-
-                              // Jugadores titulares: grid 2x3
-                              Expanded(
-                                flex: 3,
-                                child: GridView.builder(
-                                  physics: NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  itemCount: jugadores.length,
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3,
-                                    mainAxisSpacing: 10,
-                                    crossAxisSpacing: 10,
-                                    childAspectRatio: 0.7,
-                                  ),
-                                  itemBuilder: (_, index) {
-                                    return buildJugadorIcono(jugadores[index], iconSize: 26);
-                                  },
-                                ),
-                              ),
-
-                              SizedBox(height: 10),
-
-                              // Sección suplentes con altura fija, siempre presente
-                              Container(
-                                height: 200,
-                                child: // Sección suplentes con altura autoajustada en grid
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Suplentes',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white70,
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: AutoSizeText(
+                                          equipo['equipo'],
+                                          style: TextStyle(
+                                            // fontSize: 18,
+                                            fontSize: porc(0.043),
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                          maxLines: 1,
+                                          minFontSize: 10,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    suplentes.isNotEmpty
-                                        ? GridView.builder(
+                                      AutoSizeText(
+                                        '${equipo['puntaje']} pts',
+                                        style: TextStyle(
+                                          // fontSize: 16,
+                                          fontSize: porc(0.039),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white70,
+                                        ),
+                                        maxLines: 1,
+                                        minFontSize: 10,
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: porc(0.012)), // antes 5
+                                  Expanded(
+                                    flex: 3,
+                                    child: GridView.builder(
+                                      physics:
+                                      const NeverScrollableScrollPhysics(),
                                       shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemCount: suplentes.length,
-                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 3, // 👉 filas de 3
+                                      itemCount: jugadores.length,
+                                      gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 3,
                                         mainAxisSpacing: 10,
                                         crossAxisSpacing: 10,
                                         childAspectRatio: 0.7,
                                       ),
                                       itemBuilder: (_, index) {
-                                        return buildJugadorIcono(suplentes[index], iconSize: 24);
+                                        return buildJugadorIcono(
+                                            jugadores[index],
+                                            // iconSize: 26
+                                            iconSize: porc(0.063));
                                       },
-                                    )
-                                        : Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                      child: Center(
-                                        child: Text(
-                                          'Sin suplentes',
-                                          style: TextStyle(
-                                            color: Colors.white30,
-                                            fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                  SizedBox(height: porc(0.0243)), // antes 10
+                                  Container(
+                                    // height: 200,
+                                    height: porc(0.48),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        AutoSizeText(
+                                          'Suplentes',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white70,
+                                          ),
+                                          maxLines: 1,
+                                          minFontSize: 10,
+                                        ),
+                                        SizedBox(
+                                            height: porc(0.0193)),
+                                        suplentes.isNotEmpty
+                                            ? GridView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                          const NeverScrollableScrollPhysics(),
+                                          itemCount: suplentes.length,
+                                          gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 3,
+                                            mainAxisSpacing: 10,
+                                            crossAxisSpacing: 10,
+                                            childAspectRatio: 0.7,
+                                          ),
+                                          itemBuilder: (_, index) {
+                                            return buildJugadorIcono(
+                                                suplentes[index],
+                                                iconSize:
+                                                porc(0.058));
+                                          },
+                                        )
+                                            : Padding(
+                                          padding: const EdgeInsets
+                                              .symmetric(
+                                              vertical: 8.0),
+                                          child: Center(
+                                            child: AutoSizeText(
+                                              'Sin suplentes',
+                                              style: const TextStyle(
+                                                color: Colors.white30,
+                                                fontStyle:
+                                                FontStyle.italic,
+                                              ),
+                                              maxLines: 1,
+                                              minFontSize: 8,
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  ],
-                                )
-
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Parte inferior: botones
-            Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      selectPlayers();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: const Text(
-                      'Iniciar sorteo',
-                      style: TextStyle(fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          List<Map<String, dynamic>> listaParaSeleccion = [];
-                          List<Map<String, dynamic>> suplentes = [];
-
-                          for (var equipo in equiposVisuales) {
-                            suplentes.addAll(equipo['suplentes']);
-                          }
-
-
-                          for (var equipo in equiposVisuales) {
-                            // Jugadores titulares
-                            for (var j in equipo['jugadores']) {
-                              listaParaSeleccion.add({
-                                ...j,
-                                'equipo': equipo,     // Referencia al equipo
-                                'esSuplente': false,  // Es titular
-                              });
-                            }
-
-                            // Suplentes
-                            for (var s in equipo['suplentes']) {
-                              listaParaSeleccion.add({
-                                ...s,
-                                'equipo': equipo,
-                                'esSuplente': true,   // Es suplente
-                              });
-                            }
-                          }
-
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('Seleccionar Jugador o Suplente'),
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    children: listaParaSeleccion.map<Widget>((jugadorMap) {
-                                      IconData iconGenero = jugadorMap['genero'] == 'Hombre'
-                                          ? Icons.person
-                                          : Icons.person_outline;
-                                      Color colorGenero = jugadorMap['genero'] == 'Hombre'
-                                          ? Colors.blue
-                                          : Colors.pink;
-                                      IconData iconRol = jugadorMap['rol'] == 'Atacante'
-                                          ? Icons.sports_martial_arts
-                                          : Icons.shield;
-
-                                      return ListTile(
-                                        leading: Icon(iconGenero, color: colorGenero),
-                                        title: Text(jugadorMap['nombre']),
-                                        trailing: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(iconRol),
-                                            const SizedBox(width: 4),
-                                            Row(
-                                              children: List.generate(5, (i) {
-                                                return Icon(
-                                                  i < jugadorMap['calificacion']
-                                                      ? Icons.star
-                                                      : Icons.star_border,
-                                                  size: 14,
-                                                  color: Colors.amber,
-                                                );
-                                              }),
-                                            ),
-                                          ],
-                                        ),
-                                        onTap: () {
-                                          _confirmarSustitucion(context, jugadorMap);
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: Text('Cancelar'),
                                   ),
                                 ],
-                              );
-                            },
-                          );
-
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: const BorderSide(color: Colors.red),
+                              ),
+                            );
+                          }).toList(),
                         ),
-                        child: const Text(
-                          'Descontar jugador (-)',
-                          style: TextStyle(color: Colors.red,
-                              fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: agregarJugadorDialog,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: const BorderSide(color: Colors.green),
-                        ),
-                        child: const Text(
-                          'Agregar jugador (+)',
-                          style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
+                // botones inferiores quedan iguales, puedes aplicar porc también si quieres
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   // ---------------------- Funciones de sorteo y sustitucion ----------------------
 
-  void _confirmarSustitucion(BuildContext context, Map<String, dynamic> jugadorSeleccionado) {
-    List<Map<String, dynamic>> suplentes = jugadorSeleccionado['equipo']['suplentes']
-        .where((s) => s['nombre'] != jugadorSeleccionado['nombre']) // evitar reemplazarse a sí mismo
+  void _confirmarSustitucion(
+      BuildContext context, Map<String, dynamic> jugadorSeleccionado) {
+    List<Map<String, dynamic>> suplentes =
+    jugadorSeleccionado['equipo']['suplentes']
+        .where((s) => s['nombre'] != jugadorSeleccionado['nombre'])
         .toList();
 
-    Map<String, dynamic>? reemplazo = encontrarReemplazo(jugadorSeleccionado, suplentes);
+    Map<String, dynamic>? reemplazo =
+    encontrarReemplazo(jugadorSeleccionado, suplentes);
 
     if (reemplazo == null) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Sin Reemplazo'),
-          content: Text('No hay suplentes para cubrir la posición del jugador. ¿Desea resortear los equipos?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                selectPlayers();
-              },
-              child: Text('Sí'),
-            ),
-            TextButton(
-              onPressed: () {
-                var equipo = jugadorSeleccionado['equipo'];
+        builder: (context) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              double anchoDisponible = constraints.maxWidth;
 
-                // Buscar y eliminar al jugador ya sea en titulares o suplentes comparando nombres
-                for (var lista in [equipo['jugadores'], equipo['suplentes']]) {
-                  for (int i = 0; i < lista.length; i++) {
-                    if (lista[i]['nombre'] == jugadorSeleccionado['nombre']) {
-                      lista.removeAt(i);
-                      break; // salir del for interno al encontrar el jugador
-                    }
-                  }
-                }
+              // función: % → tamaño en px
+              double fontSizePorcentual(double porcentaje) =>
+                  anchoDisponible * porcentaje;
 
-                // Recalcular el puntaje del equipo
-                int nuevoPuntaje = 0;
-                for (var j in [...equipo['jugadores'], ...equipo['suplentes']]) {
-                  nuevoPuntaje += j['calificacion'] as int;
-                }
-                equipo['puntaje'] = nuevoPuntaje;
+              return AlertDialog(
+                title: Text(
+                  'Sin Reemplazo',
+                  style: TextStyle(fontSize: fontSizePorcentual(0.05)), // 5%
+                ),
+                content: Text(
+                  'No hay suplentes para cubrir la posición del jugador. ¿Desea resortear los equipos?',
+                  style: TextStyle(fontSize: fontSizePorcentual(0.042)), // 4.2%
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      'Cancelar',
+                      style:
+                      TextStyle(fontSize: fontSizePorcentual(0.04)), // 4%
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      selectPlayers();
+                    },
+                    child: Text(
+                      'Sí',
+                      style:
+                      TextStyle(fontSize: fontSizePorcentual(0.04)), // 4%
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      var equipo = jugadorSeleccionado['equipo'];
 
-                setState(() {}); // refrescar la UI
-                Navigator.of(context).pop(); // cerrar el diálogo
-                Navigator.of(context).pop(); // cerrar el diálogo
-              },
-              child: Text('No'),
-            ),
+                      // Eliminar al jugador de titulares o suplentes
+                      for (var lista in [equipo['jugadores'], equipo['suplentes']]) {
+                        lista.removeWhere(
+                                (j) => j['nombre'] == jugadorSeleccionado['nombre']);
+                      }
 
-          ],
-        ),
+                      // Recalcular puntaje
+                      int nuevoPuntaje = 0;
+                      for (var j in [...equipo['jugadores'], ...equipo['suplentes']]) {
+                        nuevoPuntaje += j['calificacion'] as int;
+                      }
+                      equipo['puntaje'] = nuevoPuntaje;
+
+                      setState(() {});
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'No',
+                      style:
+                      TextStyle(fontSize: fontSizePorcentual(0.04)), // 4%
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       );
       return;
     }
 
-    // Mostrar confirmación si hay reemplazo
+    // Diálogo con reemplazo
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmación'),
-          content: Text(
-            '¿Desea sacar a ${jugadorSeleccionado["nombre"]} del equipo? '
-                'Este jugador será sustituido por ${reemplazo["nombre"]}',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                _realizarSustitucion(jugadorSeleccionado, reemplazo);
-                Navigator.of(context).pop();
-              },
-              child: Text('Aceptar'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancelar'),
-            ),
-          ],
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            double anchoDisponible = constraints.maxWidth;
+            double fontSizePorcentual(double porcentaje) =>
+                anchoDisponible * porcentaje;
+
+            return AlertDialog(
+              title: Text(
+                'Confirmación',
+                style: TextStyle(fontSize: fontSizePorcentual(0.05)), // 5%
+              ),
+              content: Text(
+                '¿Desea sacar a ${jugadorSeleccionado["nombre"]} del equipo? '
+                    'Este jugador será sustituido por ${reemplazo["nombre"]}',
+                style: TextStyle(fontSize: fontSizePorcentual(0.042)), // 4.2%
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    _realizarSustitucion(jugadorSeleccionado, reemplazo);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Aceptar',
+                    style: TextStyle(fontSize: fontSizePorcentual(0.04)), // 4%
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    'Cancelar',
+                    style: TextStyle(fontSize: fontSizePorcentual(0.04)), // 4%
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -1293,107 +1425,127 @@ class _HomePageState extends State<HomePage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text('Seleccionar jugadores para sorteo'),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: jugadores.length,
-                  itemBuilder: (context, index) {
-                    final jugador = jugadores[index];
-                    return ListTile(
-                      onTap: () {
-                        setStateDialog(() {
-                          if (seleccionadosDialog.contains(index)) {
-                            seleccionadosDialog.remove(index);
-                          } else {
-                            seleccionadosDialog.add(index);
-                          }
-                        });
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                double anchoDisponible = constraints.maxWidth; // ancho real del AlertDialog
+                double porc(double ancho, double porcentaje) => ancho * porcentaje;
+
+                return AlertDialog(
+                  title: Text(
+                    'Seleccionar jugadores para sorteo',
+                    style: TextStyle(
+                        fontSize: porc(anchoDisponible, 0.042),
+                        fontWeight: FontWeight.bold),
+                  ),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: jugadores.length,
+                      itemBuilder: (context, index) {
+                        final jugador = jugadores[index];
+                        return ListTile(
+                          onTap: () {
+                            setStateDialog(() {
+                              if (seleccionadosDialog.contains(index)) {
+                                seleccionadosDialog.remove(index);
+                              } else {
+                                seleccionadosDialog.add(index);
+                              }
+                            });
+                          },
+                          leading: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Checkbox(
+                                value: seleccionadosDialog.contains(index),
+                                onChanged: (value) {
+                                  setStateDialog(() {
+                                    if (value == true) {
+                                      seleccionadosDialog.add(index);
+                                    } else {
+                                      seleccionadosDialog.remove(index);
+                                    }
+                                  });
+                                },
+                              ),
+                              SizedBox(width: porc(anchoDisponible, 0.014),),
+                              CircleAvatar(
+                                radius: 10,
+                                backgroundColor: jugador['genero'] == 'Mujer' ? Colors.pink : Colors.blue,
+                                child: Icon(
+                                  jugador['genero'] == 'Mujer' ? Icons.female : Icons.male,
+                                  size: porc(anchoDisponible, 0.045),
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                jugador['nombre'],
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: porc(anchoDisponible, 0.04)),
+                              ),
+                              Text(
+                                '${jugador['edad']} años',
+                                style: TextStyle(fontSize: porc(anchoDisponible, 0.04)),
+                              ),
+                            ],
+                          ),
+                          subtitle: Row(
+                            children: [
+                              Row(
+                                children: List.generate(5, (starIndex) {
+                                  return Icon(
+                                    starIndex < (jugador['calificacion'] ?? 0)
+                                        ? Icons.star
+                                        : Icons.star_border,
+                                    color: Colors.amber,
+                                    size: porc(anchoDisponible, 0.0426),
+                                  );
+                                }),
+                              ),
+                              SizedBox(width: porc(anchoDisponible, 0.014)),
+                              Text(
+                                '(${jugador['rol']})',
+                                style: TextStyle(
+                                    fontSize: porc(anchoDisponible, 0.036),
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                              ),
+                            ],
+                          ),
+                        );
                       },
-                      leading: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Checkbox(
-                            value: seleccionadosDialog.contains(index),
-                            onChanged: (value) {
-                              setStateDialog(() {
-                                if (value == true) {
-                                  seleccionadosDialog.add(index);
-                                } else {
-                                  seleccionadosDialog.remove(index);
-                                }
-                              });
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          CircleAvatar(
-                            radius: 10,
-                            backgroundColor: jugador['genero'] == 'Mujer' ? Colors.pink : Colors.blue,
-                            child: Icon(
-                              jugador['genero'] == 'Mujer' ? Icons.female : Icons.male,
-                              size: 14,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Cancelar',
+                        style: TextStyle(fontSize: porc(anchoDisponible, 0.038)),
                       ),
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            jugador['nombre'],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text('${jugador['edad']} años'),
-                        ],
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        final List<Map<String, dynamic>> jugadoresSeleccionados =
+                        seleccionadosDialog.map((i) => jugadores[i]).toList();
+                        startSort(jugadoresSeleccionados);
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'Iniciar sorteo',
+                        style: TextStyle(fontSize: porc(anchoDisponible, 0.04)),
                       ),
-                      subtitle: Row(
-                        children: [
-                          Row(
-                            children: List.generate(5, (starIndex) {
-                              return Icon(
-                                starIndex < (jugador['calificacion'] ?? 0)
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                color: Colors.amber,
-                                size: 20,
-                              );
-                            }),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '(${jugador['rol']})',
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancelar'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Llamamos a la función de iniciar sorteo pasando los seleccionados
-                    final List<Map<String, dynamic>> jugadoresSeleccionados =
-                    seleccionadosDialog.map((i) => jugadores[i]).toList();
-
-                    startSort(jugadoresSeleccionados);
-
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Iniciar sorteo'),
-                ),
-              ],
+                    ),
+                  ],
+                );
+              },
             );
           },
         );
