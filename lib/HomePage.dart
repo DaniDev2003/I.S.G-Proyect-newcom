@@ -1208,7 +1208,164 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                 ),
-                // botones inferiores quedan iguales, puedes aplicar porc también si quieres
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          selectPlayers();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: AutoSizeText(
+                          'Iniciar sorteo',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          minFontSize: 10,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              List<Map<String, dynamic>> listaParaSeleccion = [];
+                              List<Map<String, dynamic>> suplentes = [];
+
+                              for (var equipo in equiposVisuales) {
+                                suplentes.addAll(equipo['suplentes']);
+                              }
+
+                              for (var equipo in equiposVisuales) {
+                                // Jugadores titulares
+                                for (var j in equipo['jugadores']) {
+                                  listaParaSeleccion.add({
+                                    ...j,
+                                    'equipo': equipo, // Referencia al equipo
+                                    'esSuplente': false, // Es titular
+                                  });
+                                }
+                                // Suplentes
+                                for (var s in equipo['suplentes']) {
+                                  listaParaSeleccion.add({
+                                    ...s,
+                                    'equipo': equipo,
+                                    'esSuplente': true, // Es suplente
+                                  });
+                                }
+                              }
+
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Seleccionar Jugador o Suplente'),
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        children: listaParaSeleccion.map<Widget>((jugadorMap) {
+                                          IconData iconGenero =
+                                          jugadorMap['genero'] == 'Hombre'
+                                              ? Icons.person
+                                              : Icons.person_outline;
+                                          Color colorGenero =
+                                          jugadorMap['genero'] == 'Hombre'
+                                              ? Colors.blue
+                                              : Colors.pink;
+                                          IconData iconRol =
+                                          jugadorMap['rol'] == 'Atacante'
+                                              ? Icons.sports_martial_arts
+                                              : Icons.shield;
+
+                                          return ListTile(
+                                            leading: Icon(iconGenero, color: colorGenero),
+                                            title: Text(jugadorMap['nombre']),
+                                            trailing: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(iconRol),
+                                                const SizedBox(width: 4),
+                                                Row(
+                                                  children: List.generate(5, (i) {
+                                                    return Icon(
+                                                      i < jugadorMap['calificacion']
+                                                          ? Icons.star
+                                                          : Icons.star_border,
+                                                      size: 14,
+                                                      color: Colors.amber,
+                                                    );
+                                                  }),
+                                                ),
+                                              ],
+                                            ),
+                                            onTap: () {
+                                              _confirmarSustitucion(context, jugadorMap);
+                                            },
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: Text('Cancelar'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: Colors.red),
+                            ),
+                            child: AutoSizeText(
+                              'Descontar jugador (-)',
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              minFontSize: 10,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: agregarJugadorDialog,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: const BorderSide(color: Colors.green),
+                            ),
+                            child: AutoSizeText(
+                              'Agregar jugador (+)',
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              minFontSize: 10,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
