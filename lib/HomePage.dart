@@ -689,7 +689,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     textAlign: TextAlign.center,
                     minFontSize: 12,
-                    maxLines: 1,
+                    maxLines: 2,
                   ),
                   trailing: Wrap(
                     spacing: 4,
@@ -850,7 +850,7 @@ class _HomePageState extends State<HomePage> {
                           fontSize: fs(16 / 410),
                         ),
                         minFontSize: 8,
-                        maxLines: 1,
+                        maxLines: 2,
                       ),
                       AutoSizeText(
                         '${jugador['edad']} años',
@@ -942,6 +942,7 @@ class _HomePageState extends State<HomePage> {
         double porc(double porcentaje) => anchoDisponible * porcentaje;
 
         return SafeArea(
+          bottom: true,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
             child: Column(
@@ -1055,7 +1056,7 @@ class _HomePageState extends State<HomePage> {
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                maxLines: 1,
+                                maxLines: 2,
                                 minFontSize: 8,
                               ),
                             ),
@@ -1364,6 +1365,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ],
