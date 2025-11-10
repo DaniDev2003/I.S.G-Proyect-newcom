@@ -172,8 +172,8 @@ class _HomePageState extends State<HomePage> {
                             labelStyle: TextStyle(fontSize: labelFontSize),
                           ),
                           items: const [
-                            DropdownMenuItem(value: 'Hombre', child: Text('Hombre ♂')),
-                            DropdownMenuItem(value: 'Mujer', child: Text('Mujer ♀')),
+                            DropdownMenuItem(value: 'Hombre', child: Text('Hombre ♂', style: TextStyle(color: Colors.black87),)),
+                            DropdownMenuItem(value: 'Mujer', child: Text('Mujer ♀', style: TextStyle(color: Colors.black87),)),
                           ],
                           style: TextStyle(fontSize: textFontSize),
                           onChanged: (value) {
@@ -200,8 +200,8 @@ class _HomePageState extends State<HomePage> {
                             labelStyle: TextStyle(fontSize: labelFontSize),
                           ),
                           items: const [
-                            DropdownMenuItem(value: 'Atacante', child: Text('Atacante')),
-                            DropdownMenuItem(value: 'Defensor', child: Text('Defensor')),
+                            DropdownMenuItem(value: 'Atacante', child: Text('Atacante', style: TextStyle(color: Colors.black87),)),
+                            DropdownMenuItem(value: 'Defensor', child: Text('Defensor', style: TextStyle(color: Colors.black87),)),
                           ],
                           style: TextStyle(fontSize: textFontSize),
                           onChanged: (value) {
